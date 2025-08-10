@@ -2,9 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\JobController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SiteController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Auth\SocialController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -67,3 +69,19 @@ Route::middleware('auth')->group(function () {
                     ->middleware('can:view permissions');
           });
 });
+
+
+route::prefix('admin')
+    ->name('admin.')
+    ->middleware('auth')
+    ->group(function () {
+        Route::resource('skills', SkillController::class)->except(['show']);
+    });
+
+
+    Route::prefix('admin')
+    ->name('admin.')
+    ->middleware('auth')
+    ->group(function () {
+        Route::resource('jobs', JobController::class); // full CRUD incl. show
+    });
