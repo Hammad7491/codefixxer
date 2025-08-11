@@ -9,7 +9,9 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Auth\SocialController;
 use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EducationController;
 use App\Http\Controllers\Chatbot\ChatbotController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Chatbot\UserNameController;
@@ -85,3 +87,30 @@ route::prefix('admin')
     ->group(function () {
         Route::resource('jobs', JobController::class); // full CRUD incl. show
     });
+
+
+
+    Route::prefix('admin')
+    ->name('admin.')
+    ->middleware('auth')
+    ->group(function () {
+        Route::resource('projects', ProjectController::class); // full CRUD (index, create, store, show, edit, update, destroy)
+    });
+
+
+    Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+    Route::resource('projects', ProjectController::class);
+
+    // stream/download project media safely
+    Route::get('projects/{project}/media/{kind}/{index?}', [ProjectController::class, 'media'])
+        ->whereIn('kind', ['video','doc','image'])
+        ->name('projects.media');
+});
+
+
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    
+    // Education CRUD
+    Route::resource('educations', EducationController::class);
+    
+});

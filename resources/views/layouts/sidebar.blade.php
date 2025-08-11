@@ -127,6 +127,54 @@
   </ul>
 </li>
 
+
+<!-- Projects -->
+<li class="nav-item">
+  <a class="d-flex align-items-center js-toggle">
+    <iconify-icon icon="mdi:folder-outline" class="menu-icon"></iconify-icon>
+    <span>Projects</span>
+    <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
+  </a>
+  <ul class="sidebar-submenu">
+    <li>
+      <a href="{{ route('admin.projects.create') }}">
+        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Project
+      </a>
+    </li>
+    <li>
+      <a href="{{ route('admin.projects.index') }}">
+        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Projects
+      </a>
+    </li>
+  </ul>
+</li>
+
+
+
+
+<!-- Education -->
+<li class="nav-item">
+  <a class="d-flex align-items-center js-toggle">
+    <iconify-icon icon="mdi:school-outline" class="menu-icon"></iconify-icon>
+    <span>Education</span>
+    <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
+  </a>
+  <ul class="sidebar-submenu">
+    <li>
+      <a href="{{ route('admin.educations.create') }}">
+        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Education
+      </a>
+    </li>
+    <li>
+      <a href="">
+        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Education
+      </a>
+    </li>
+  </ul>
+</li>
+
+    
+
       <!-- Email -->
       <li class="nav-item">
         <a href="email.html" class="d-flex align-items-center">
