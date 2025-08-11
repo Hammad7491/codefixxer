@@ -13,6 +13,18 @@
   .sidebar-submenu li a:hover { background:#eef2ff; }
   .sidebar-submenu li a.active { background:#dbe5ff; font-weight:600; }
   .circle-icon { font-size: .6rem; }
+
+  /* NEW: heading + PMS button */
+  .sidebar-heading {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: .25rem 1.25rem 1rem; color:#111827; font-weight:700; letter-spacing:.2px;
+  }
+  .pms-btn {
+    display:inline-flex; align-items:center; gap:.35rem;
+    padding:.35rem .6rem; border-radius:.5rem; background:#4f7cff; color:#fff;
+    text-decoration:none; font-weight:600; font-size:.8rem;
+  }
+  .pms-btn:hover { background:#3e66e0; }
 </style>
 
 <aside class="sidebar">
@@ -28,9 +40,10 @@
     </a>
   </div>
 
+ 
+
   <div class="sidebar-menu-area">
     <ul class="sidebar-menu" id="sidebar-accordion">
-
       <!-- Dashboard -->
       <li class="nav-item">
         <a class="d-flex align-items-center js-toggle">
@@ -58,26 +71,10 @@
           <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
         </a>
         <ul class="sidebar-submenu">
-          <li>
-            <a href="{{ route('admin.users.create') }}">
-              <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Users
-            </a>
-          </li>
-          <li>
-            <a href="{{ route('admin.users.index') }}">
-              <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Users List
-            </a>
-          </li>
-          <li>
-            <a href="{{ route('admin.roles.index') }}">
-              <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Roles & Permissions
-            </a>
-          </li>
-          <li>
-            <a href="{{ route('admin.permissions.index') }}">
-              <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Permissions
-            </a>
-          </li>
+          <li><a href="{{ route('admin.users.create') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Users</a></li>
+          <li><a href="{{ route('admin.users.index') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> Users List</a></li>
+          <li><a href="{{ route('admin.roles.index') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> Roles & Permissions</a></li>
+          <li><a href="{{ route('admin.permissions.index') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> Permissions</a></li>
         </ul>
       </li>
 
@@ -92,90 +89,51 @@
           <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
         </a>
         <ul class="sidebar-submenu">
-          <li>
-            <a href="{{ route('admin.skills.create') }}">
-              <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Skill
-            </a>
-          </li>
-          <li>
-            <a href="{{ route('admin.skills.index') }}">
-              <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Skills
-            </a>
-          </li>
+          <li><a href="{{ route('admin.skills.create') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Skill</a></li>
+          <li><a href="{{ route('admin.skills.index') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Skills</a></li>
         </ul>
       </li>
 
+      <!-- Jobs -->
+      <li class="nav-item">
+        <a class="d-flex align-items-center js-toggle">
+          <iconify-icon icon="mdi:briefcase-outline" class="menu-icon"></iconify-icon>
+          <span>Jobs</span>
+          <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
+        </a>
+        <ul class="sidebar-submenu">
+          <li><a href="{{ route('admin.jobs.create') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Job</a></li>
+          <li><a href=""><i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Jobs</a></li>
+        </ul>
+      </li>
 
-            <!-- Jobs -->
-<li class="nav-item">
-  <a class="d-flex align-items-center js-toggle">
-    <iconify-icon icon="mdi:briefcase-outline" class="menu-icon"></iconify-icon>
-    <span>Jobs</span>
-    <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
-  </a>
-  <ul class="sidebar-submenu">
-    <li>
-      <a href="{{ route('admin.jobs.create') }}">
-        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Job
-      </a>
-    </li>
-    <li>
-      <a href="">
-        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Jobs
-      </a>
-    </li>
-  </ul>
-</li>
+      <!-- Projects -->
+      <li class="nav-item">
+        <a class="d-flex align-items-center js-toggle">
+          <iconify-icon icon="mdi:folder-outline" class="menu-icon"></iconify-icon>
+          <span>Projects</span>
+          <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
+        </a>
+        <ul class="sidebar-submenu">
+          <li><a href="{{ route('admin.projects.create') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Project</a></li>
+          <li><a href="{{ route('admin.projects.index') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Projects</a></li>
+        </ul>
+      </li>
 
+      <!-- Education -->
+      <li class="nav-item">
+        <a class="d-flex align-items-center js-toggle">
+          <iconify-icon icon="mdi:school-outline" class="menu-icon"></iconify-icon>
+          <span>Education</span>
+          <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
+        </a>
+        <ul class="sidebar-submenu">
+          <li><a href="{{ route('admin.educations.create') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Education</a></li>
+          <li><a href="{{ route('admin.educations.index') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Education</a></li>
+        </ul>
+      </li>
 
-<!-- Projects -->
-<li class="nav-item">
-  <a class="d-flex align-items-center js-toggle">
-    <iconify-icon icon="mdi:folder-outline" class="menu-icon"></iconify-icon>
-    <span>Projects</span>
-    <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
-  </a>
-  <ul class="sidebar-submenu">
-    <li>
-      <a href="{{ route('admin.projects.create') }}">
-        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Project
-      </a>
-    </li>
-    <li>
-      <a href="{{ route('admin.projects.index') }}">
-        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Projects
-      </a>
-    </li>
-  </ul>
-</li>
-
-
-
-
-<!-- Education -->
-<li class="nav-item">
-  <a class="d-flex align-items-center js-toggle">
-    <iconify-icon icon="mdi:school-outline" class="menu-icon"></iconify-icon>
-    <span>Education</span>
-    <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
-  </a>
-  <ul class="sidebar-submenu">
-    <li>
-      <a href="{{ route('admin.educations.create') }}">
-        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Education
-      </a>
-    </li>
-    <li>
-      <a href="{{ route('admin.educations.index') }}">
-        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Education
-      </a>
-    </li>
-  </ul>
-</li>
-
-
-
-  <!-- Languages (NEW) -->
+      <!-- Languages -->
       <li class="nav-item">
         <a class="d-flex align-items-center js-toggle">
           <iconify-icon icon="mdi:translate" class="menu-icon"></iconify-icon>
@@ -183,68 +141,50 @@
           <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
         </a>
         <ul class="sidebar-submenu">
-          <li>
-            <a href="{{ route('admin.languages.create') }}">
-              <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Language
-            </a>
-          </li>
-          <li>
-            <a href="{{ route('admin.languages.index') }}">
-              <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Languages
-            </a>
-          </li>
+          <li><a href="{{ route('admin.languages.create') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Language</a></li>
+          <li><a href="{{ route('admin.languages.index') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Languages</a></li>
+        </ul>
+      </li>
+
+      <!-- Legal Documents -->
+      <li class="sidebar-menu-group-title">Legal Documents</li>
+
+      <!-- Invoice -->
+      <li class="nav-item">
+        <a class="d-flex align-items-center js-toggle">
+          <iconify-icon icon="mdi:file-document-outline" class="menu-icon"></iconify-icon>
+          <span>Invoice</span>
+          <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
+        </a>
+        <ul class="sidebar-submenu">
+          <li><a href="{{ route('admin.invoices.create') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Invoice</a></li>
+          <li><a href="{{ route('admin.invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Invoices</a></li>
+        </ul>
+      </li>
+
+      <!-- Contract -->
+      <li class="nav-item">
+        <a class="d-flex align-items-center js-toggle">
+          <iconify-icon icon="mdi:file-document-outline" class="menu-icon"></iconify-icon>
+          <span>Contract</span>
+          <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
+        </a>
+        <ul class="sidebar-submenu">
+          <li><a href="{{ route('admin.contracts.create') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Contract</a></li>
+          <li><a href="{{ route('admin.contracts.index') }}"><i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Contracts</a></li>
         </ul>
       </li>
 
 
 
-      <!-- Legal Documents section -->
-<li class="sidebar-menu-group-title">Legal Documents</li>
-
-<!-- Invoice -->
+       <!-- NEW: Heading + PMS button -->
+  <li class="sidebar-menu-group-title">Project Management System</li>
 <li class="nav-item">
-  <a class="d-flex align-items-center js-toggle">
-    <iconify-icon icon="mdi:file-document-outline" class="menu-icon"></iconify-icon>
-    <span>Invoice</span>
-    <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
+  <a href="{{ route('admin.pms.create') }}" class="d-flex align-items-center">
+    <iconify-icon icon="mdi:folder-outline" class="menu-icon"></iconify-icon>
+    <span>PMS</span>
   </a>
-  <ul class="sidebar-submenu">
-    <li>
-      <a href="{{ route('admin.invoices.create') }}">
-        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Invoice
-      </a>
-    </li>
-    <li>
-      <a href="{{ route('admin.invoices.index') }}">
-        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Invoices
-      </a>
-    </li>
-  </ul>
 </li>
-
-
-
-<li class="nav-item">
-  <a class="d-flex align-items-center js-toggle">
-    <iconify-icon icon="mdi:file-document-outline" class="menu-icon"></iconify-icon>
-    <span>Contract</span>
-    <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
-  </a>
-  <ul class="sidebar-submenu">
-    <li>
-      <a href="{{ route('admin.contracts.create') }}">
-        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Contract
-      </a>
-    </li>
-    <li>
-      <a href="{{ route('admin.contracts.index') }}">
-        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Contracts
-      </a>
-    </li>
-  </ul>
-</li>
-
-    
 
       <!-- Email -->
       <li class="nav-item">
@@ -253,11 +193,6 @@
           <span>Email</span>
         </a>
       </li>
-
-
-
-
-
     </ul>
   </div>
 </aside>
@@ -271,7 +206,6 @@
     accordion.querySelectorAll('.js-toggle').forEach(function (toggle) {
       toggle.addEventListener('click', function (e) {
         e.preventDefault();
-
         const currentSub = this.nextElementSibling;
         if (!currentSub || !currentSub.classList.contains('sidebar-submenu')) return;
 

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\JobController;
+use App\Http\Controllers\Admin\PmsController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SiteController;
 use App\Http\Controllers\Admin\UserController;
@@ -151,3 +152,15 @@ Route::middleware(['auth'])->prefix('admin')->as('admin.')->group(function () {
     // Contracts CRUD
     Route::resource('contracts', ContractController::class);
 });
+
+
+Route::middleware('auth') // drop this if you want it public
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        // Resource-style routes, limited to create + store
+        Route::resource('pms', PmsController::class)->only(['create', 'store']);
+        // Names produced:
+        // admin.pms.create  -> GET  /admin/pms/create
+        // admin.pms.store   -> POST /admin/pms
+    });
