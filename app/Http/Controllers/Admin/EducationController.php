@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Education;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class EducationController extends Controller
 {
     public function index()
     {
-        $tenantId = $this->tenantId();
+        $tenantId = Auth::user()->id;
         $q = request('q', '');
 
         $educations = Education::where('tenant_id', $tenantId)
@@ -38,7 +39,7 @@ class EducationController extends Controller
     public function store(Request $request)
     {
         $data = $this->validated($request);
-        $data['tenant_id'] = $this->tenantId();
+        $data['tenant_id'] = Auth::user()->id;
         $data['certifications'] = $this->decodeArray($data['certifications'] ?? null);
 
         Education::create($data);
@@ -110,17 +111,9 @@ class EducationController extends Controller
         return [];
     }
 
-    protected function tenantId(): int
-    {
-        $user = auth()->user();
-        if (!$user) abort(401, 'Please log in.');
-        // Fallback tenant_id = 1 if null
-        return (int) ($user->tenant_id ?? 1);
-    }
-
     protected function authorizeTenant(Education $education): void
     {
-        if ((int) $education->tenant_id !== $this->tenantId()) {
+        if ((int) $education->tenant_id !== Auth::user()->id) {
             abort(404);
         }
     }

@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
@@ -12,7 +13,7 @@ class ProjectController extends Controller
     // List (tenant scoped)
     public function index()
     {
-        $tenantId = $this->tenantId();
+        $tenantId = Auth::user()->id;
         $q = request('q');
 
         $projects = Project::where('tenant_id', $tenantId)
@@ -39,7 +40,7 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         $data = $this->validated($request);
-        $data['tenant_id']  = $this->tenantId();
+        $data['tenant_id']  = Auth::user()->id;
         $data['tools_used'] = $this->decodeTools($data['tools_used'] ?? null);
 
         // handle uploads
@@ -211,17 +212,12 @@ class ProjectController extends Controller
         return $out;
     }
 
-    protected function tenantId(): int
-    {
-        $user = auth()->user();
-        if ($user && $user->tenant_id) return (int) $user->tenant_id;
-        // Dev fallback so you can test before wiring tenant on users
-        return 1;
-    }
+
+
 
     protected function authorizeTenant(Project $project): void
     {
-        if ((int) $project->tenant_id !== $this->tenantId()) {
+        if ((int) $project->tenant_id !== Auth::user()->id) {
             abort(404);
         }
     }

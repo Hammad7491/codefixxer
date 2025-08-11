@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Job;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class JobController extends Controller
 {
@@ -111,14 +112,11 @@ class JobController extends Controller
         return [];
     }
 
-    protected function tenantId(): int
-    {
-        $user = auth()->user();
-        if ($user && $user->tenant_id) return (int) $user->tenant_id;
+  protected function tenantId(): int
+{
+    return Auth::user()->id ?? 0;
+}
 
-        // DEV fallback so you can work before wiring tenant IDs on users
-        return 1;
-    }
 
     protected function authorizeTenant(Job $job): void
     {

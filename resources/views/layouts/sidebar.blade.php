@@ -166,7 +166,7 @@
       </a>
     </li>
     <li>
-      <a href="">
+      <a href="{{ route('admin.educations.index') }}">
         <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Education
       </a>
     </li>
@@ -189,7 +189,7 @@
             </a>
           </li>
           <li>
-            <a href="">
+            <a href="{{ route('admin.languages.index') }}">
               <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Languages
             </a>
           </li>

@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Skill;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class SkillController extends Controller
 {
     // List (scoped to tenant)
  public function index()
 {
-    $tenantId = $this->tenantId();
+    $tenantId = Auth::user()->id;
     $q = request('q');
 
     $skills = Skill::where('tenant_id', $tenantId)
@@ -47,7 +48,7 @@ class SkillController extends Controller
         ]);
 
         // Assign tenant (safe fallback so you don't 500 while setting up tenanting)
-        $data['tenant_id'] = $this->tenantId();
+        $data['tenant_id'] = Auth::user()->id;
 
         // Decode tools JSON -> array
         if (!empty($data['tools']) && is_string($data['tools'])) {
@@ -103,28 +104,11 @@ class SkillController extends Controller
         return back()->with('success', 'Skill deleted.');
     }
 
-    // ===== Helpers =====
 
-    /**
-     * Return the current tenant id.
-     * DEV FALLBACK: if the logged-in user has no tenant_id yet, default to 1 so you don't 500.
-     * Replace this with your real tenant resolver once users all have tenant_id.
-     */
-    protected function tenantId(): int
-    {
-        $user = auth()->user();
-
-        if ($user && isset($user->tenant_id) && $user->tenant_id) {
-            return (int) $user->tenant_id;
-        }
-
-        // DEV fallback — keep your app working while you wire tenanting
-        return 1;
-    }
 
     protected function authorizeTenant(Skill $skill): void
     {
-        if ((int) $skill->tenant_id !== $this->tenantId()) {
+        if ((int) $skill->tenant_id !== Auth::user()->id) {
             abort(404);
         }
     }

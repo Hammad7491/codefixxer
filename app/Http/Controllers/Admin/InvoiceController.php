@@ -3,190 +3,205 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Invoice;
+use App\Models\Contract;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
-class InvoiceController extends Controller
+class ContractController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $invoices = Invoice::query()->latest()->paginate(12);
-        return view('admin.invoices.index', compact('invoices'));
+        $tenantId = Auth::user()->tenant_id ?? Auth::id();
+
+        $contracts = Contract::where('tenant_id', $tenantId)
+            ->latest()
+            ->paginate(12);
+
+        return view('admin.contracts.index', compact('contracts'));
     }
 
     public function create()
     {
-        return view('admin.invoices.create');
+        return view('admin.contracts.create'); // reuse for edit
     }
 
     public function store(Request $request)
     {
         $data = $this->validated($request);
+        $tenantId = Auth::user()->tenant_id ?? Auth::id();
 
-        // Resolve tenant id (adjust the fallback if needed)
-        $tenantId = auth()->user()?->tenant_id ?? session('tenant_id') ?? 1;
+        $contract = null;
 
-        // tax is disabled globally
-        $data['tax_percent'] = 0;
+        DB::transaction(function () use ($data, $tenantId, &$contract) {
+            // Create base contract
+            $contract = new Contract($data);
+            $contract->tenant_id = $tenantId;
+            $contract->contract_number = $contract->contract_number ?: $this->nextNumber($tenantId);
+            $contract->save();
 
-        $invoice = null; // needed because we pass by reference into the closure
-
-        DB::transaction(function () use ($data, $tenantId, &$invoice) {
-            // Create invoice with tenant
-            $invoice = new Invoice($data);
-            $invoice->tenant_id = $tenantId;
-            $invoice->invoice_number = $invoice->invoice_number ?: $this->nextNumber($tenantId);
-            $invoice->save();
-
-            // Milestones (force tenant)
+            // Create milestones (if any)
             foreach ($data['milestones'] as $m) {
-                if (blank($m['name']) && blank($m['amount'])) continue;
-
-                $invoice->milestones()->create([
-                    'tenant_id' => $tenantId,
-                    'name'      => $m['name'] ?? '',
-                    'due_date'  => $m['due_date'] ?? null,
-                    'amount'    => $m['amount'] ?? 0,
+                if (blank($m['name']) && blank($m['amount'])) {
+                    continue;
+                }
+                $contract->milestones()->create([
+                    'tenant_id'   => $tenantId,
+                    'name'        => $m['name'] ?? '',
+                    'description' => $m['description'] ?? '',
+                    'due_date'    => $m['due_date'] ?? null,
+                    'amount'      => $m['amount'] ?? 0,
                 ]);
             }
 
-            // Totals (tax always 0 in model logic)
-            $invoice->recalcTotals();
-            $invoice->save();
+            // Totals
+            $contract->recalcTotal();
+            $contract->save();
         });
 
-        return redirect()->route('admin.invoices.show', $invoice)
-            ->with('success', 'Invoice created.');
+        return redirect()->route('admin.contracts.show', $contract)
+            ->with('success', 'Contract created.');
     }
 
-    public function show(Invoice $invoice)
+    public function show(Contract $contract)
     {
-        $invoice->load('milestones');
-        return view('admin.invoices.show', compact('invoice'));
+        $this->authorizeTenant($contract);
+
+        $contract->load('milestones');
+        return view('admin.contracts.show', compact('contract'));
     }
 
-    public function edit(Invoice $invoice)
+    public function edit(Contract $contract)
     {
-        $invoice->load('milestones');
-        return view('admin.invoices.create', compact('invoice'));
+        $this->authorizeTenant($contract);
+
+        $contract->load('milestones');
+        // reuse create blade (prefills with old(...) and $contract values)
+        return view('admin.contracts.create', compact('contract'));
     }
 
-    public function update(Request $request, Invoice $invoice)
+    public function update(Request $request, Contract $contract)
     {
-        $data = $this->validated($request, $invoice->id);
+        $this->authorizeTenant($contract);
 
-        $tenantId = auth()->user()?->tenant_id ?? session('tenant_id') ?? 1;
-        $data['tax_percent'] = 0; // still disabled
+        $data = $this->validated($request);
+        $tenantId = Auth::user()->tenant_id ?? Auth::id();
 
-        DB::transaction(function () use ($data, $tenantId, $invoice) {
-            $invoice->fill($data);
-            $invoice->tenant_id = $tenantId; // enforce tenant
-            $invoice->save();
+        DB::transaction(function () use ($data, $tenantId, $contract) {
+            $contract->fill($data);
+            $contract->tenant_id = $tenantId;
+            $contract->save();
 
-            // Simple sync: delete & recreate
-            $invoice->milestones()->delete();
+            // Simple sync: delete & recreate milestones
+            $contract->milestones()->delete();
+
             foreach ($data['milestones'] as $m) {
-                if (blank($m['name']) && blank($m['amount'])) continue;
-
-                $invoice->milestones()->create([
-                    'tenant_id' => $tenantId,
-                    'name'      => $m['name'] ?? '',
-                    'due_date'  => $m['due_date'] ?? null,
-                    'amount'    => $m['amount'] ?? 0,
+                if (blank($m['name']) && blank($m['amount'])) {
+                    continue;
+                }
+                $contract->milestones()->create([
+                    'tenant_id'   => $tenantId,
+                    'name'        => $m['name'] ?? '',
+                    'description' => $m['description'] ?? '',
+                    'due_date'    => $m['due_date'] ?? null,
+                    'amount'      => $m['amount'] ?? 0,
                 ]);
             }
 
-            $invoice->recalcTotals();
-            $invoice->save();
+            $contract->recalcTotal();
+            $contract->save();
         });
 
-        return redirect()->route('admin.invoices.show', $invoice)
-            ->with('success', 'Invoice updated.');
+        return redirect()->route('admin.contracts.show', $contract)
+            ->with('success', 'Contract updated.');
     }
 
-    public function destroy(Invoice $invoice)
+    public function destroy(Contract $contract)
     {
-        $invoice->delete();
-        return back()->with('success', 'Invoice deleted.');
+        $this->authorizeTenant($contract);
+
+        $contract->delete();
+        return back()->with('success', 'Contract deleted.');
     }
 
-    protected function validated(Request $request, $ignoreId = null): array
-    {
-        // Resolve tenant for unique rule; use same fallback as store/update
-        $tenantId = auth()->user()?->tenant_id ?? session('tenant_id') ?? 1;
+    /* =================== Helpers =================== */
 
+    protected function validated(Request $request): array
+    {
         $validated = $request->validate([
-            'invoice_number' => [
-                'nullable', 'string', 'max:191',
-                Rule::unique('invoices')
-                    ->where(fn($q) => $q->where('tenant_id', $tenantId))
-                    ->ignore($ignoreId),
-            ],
+            'contract_number'        => ['nullable','string','max:191'],
+            'title'                  => ['nullable','string','max:191'],
+            'purpose'                => ['nullable','string'],
 
-            'client_name'        => ['required', 'string', 'max:191'],
-            'contact_person'     => ['nullable', 'string', 'max:191'],
-            'client_email'       => ['nullable', 'email', 'max:191'],
-            'client_phone'       => ['nullable', 'string', 'max:191'],
-            'client_address'     => ['nullable', 'string'],
+            'client_name'            => ['nullable','string','max:191'],
+            'client_email'           => ['nullable','email','max:191'],
+            'client_phone'           => ['nullable','string','max:191'],
+            'client_address'         => ['nullable','string'],
 
-            'project_title'       => ['nullable', 'string', 'max:191'],
-            'project_description' => ['nullable', 'string'],
+            'start_date'             => ['nullable','date'],
+            'end_date'               => ['nullable','date','after_or_equal:start_date'],
 
-            'discount_name'  => ['nullable', 'string', 'max:191'],
-            'discount_type'  => ['required', Rule::in(['percent','fixed'])],
-            'discount_value' => ['required', 'numeric', 'min:0'],
+            'project_timeline'       => ['nullable','string'],
+            'payment_terms'          => ['nullable','string'],
 
-            // tax is disabled; accept but ignore
-            'tax_percent'    => ['nullable'],
+            'revisions'              => ['nullable','string'],
+            'ownership_ip'           => ['nullable','string'],
+            'confidentiality'        => ['nullable','string'],
+            'client_responsibilities'=> ['nullable','string'],
+            'termination_clause'     => ['nullable','string'],
 
-            'bank_name'     => ['nullable', 'string', 'max:191'],
-            'bank_account'  => ['nullable', 'string', 'max:191'],
-            'account_holder'=> ['nullable', 'string', 'max:191'],
-            'terms'         => ['nullable', 'string'],
+            'dispute_resolution'     => ['nullable','string'],
+            'limitation_of_liability'=> ['nullable','string'],
+            'amendments'             => ['nullable','string'],
 
-            'milestone_name'     => ['array'],
-            'milestone_name.*'   => ['nullable','string','max:191'],
-            'milestone_date'     => ['array'],
-            'milestone_date.*'   => ['nullable','date'],
-            'milestone_amount'   => ['array'],
-            'milestone_amount.*' => ['nullable','numeric','min:0'],
+            // milestone arrays
+            'milestone_name'         => ['array'],
+            'milestone_name.*'       => ['nullable','string','max:191'],
+            'milestone_desc'         => ['array'],
+            'milestone_desc.*'       => ['nullable','string'],
+            'milestone_date'         => ['array'],
+            'milestone_date.*'       => ['nullable','date'],
+            'milestone_amount'       => ['array'],
+            'milestone_amount.*'     => ['nullable','numeric','min:0'],
         ]);
 
-        // Normalize milestones
+        // Normalize milestones into a structured array for creation
         $milestones = [];
-        $names  = $request->input('milestone_name', []);
-        $dates  = $request->input('milestone_date', []);
-        $amount = $request->input('milestone_amount', []);
-        $count  = max(count($names), count($dates), count($amount));
+        $names = $request->input('milestone_name', []);
+        $descs = $request->input('milestone_desc', []);
+        $dates = $request->input('milestone_date', []);
+        $amts  = $request->input('milestone_amount', []);
+        $count = max(count($names), count($descs), count($dates), count($amts));
 
-        for ($i=0; $i<$count; $i++) {
+        for ($i = 0; $i < $count; $i++) {
             $milestones[] = [
-                'name'     => $names[$i]  ?? null,
-                'due_date' => $dates[$i]  ?? null,
-                'amount'   => $amount[$i] ?? 0,
+                'name'        => $names[$i] ?? null,
+                'description' => $descs[$i] ?? null,
+                'due_date'    => $dates[$i] ?? null,
+                'amount'      => $amts[$i] ?? 0,
             ];
         }
-        $validated['milestones'] = $milestones;
 
-        // Force tax to 0 always
-        $validated['tax_percent'] = 0;
+        $validated['milestones'] = $milestones;
 
         return $validated;
     }
 
     protected function nextNumber(?int $tenantId = null): string
     {
-        $tenantId = $tenantId ?? (auth()->user()?->tenant_id ?? session('tenant_id') ?? 1);
+        $tenantId = $tenantId ?? (Auth::user()->tenant_id ?? Auth::id());
 
-        // Look for the last invoice number for this tenant
-        $last = Invoice::forTenant($tenantId)->orderByDesc('id')->value('invoice_number');
-
-        // Extract trailing digits and increment; default start #1001
+        $last = Contract::forTenant($tenantId)->orderByDesc('id')->value('contract_number');
         $n = (int) preg_replace('/\D+/', '', (string) $last);
-        $n = $n ? $n + 1 : 1001;
 
-        return '#' . $n;
+        return '#' . ($n ? $n + 1 : 2001);
+    }
+
+    protected function authorizeTenant(Contract $contract): void
+    {
+        $currentTenant = Auth::user()->tenant_id ?? Auth::id();
+        if ($contract->tenant_id !== $currentTenant) {
+            abort(403, 'Unauthorized');
+        }
     }
 }

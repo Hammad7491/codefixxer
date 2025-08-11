@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Language;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class LanguageController extends Controller
 {
     /** List (tenant-scoped). Ordered oldest->newest so newly added appears last like your other lists. */
     public function index()
     {
-        $tenantId = $this->tenantId();
+        $tenantId = Auth::user()->id;
         $q = request('q', '');
 
         $languages = Language::where('tenant_id', $tenantId)
@@ -39,7 +40,7 @@ class LanguageController extends Controller
     public function store(Request $request)
     {
         $data = $this->validated($request);
-        $data['tenant_id'] = $this->tenantId();
+        $data['tenant_id'] = Auth::user()->id;
 
         Language::create($data);
 
@@ -88,17 +89,10 @@ class LanguageController extends Controller
         ]);
     }
 
-    protected function tenantId(): int
-    {
-        $user = auth()->user();
-        if (!$user) abort(401, 'Please log in.');
-        // same friendly fallback you used elsewhere
-        return (int) ($user->tenant_id ?? 1);
-    }
 
     protected function authorizeTenant(Language $language): void
     {
-        if ((int) $language->tenant_id !== $this->tenantId()) {
+        if ((int) $language->tenant_id !== Auth::user()->id) {
             abort(404); // hide across tenants
         }
     }
