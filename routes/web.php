@@ -9,7 +9,10 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Auth\SocialController;
 use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\ProjectController;
+use App\Http\Controllers\Admin\ContractController;
+use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EducationController;
 use App\Http\Controllers\Chatbot\ChatbotController;
@@ -113,4 +116,38 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // Education CRUD
     Route::resource('educations', EducationController::class);
     
+});
+
+
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('languages', [LanguageController::class, 'index'])->name('languages.index');
+    Route::get('languages/create', [LanguageController::class, 'create'])->name('languages.create');
+    Route::post('languages', [LanguageController::class, 'store'])->name('languages.store');
+    Route::get('languages/{language}/edit', [LanguageController::class, 'edit'])->name('languages.edit');
+    Route::put('languages/{language}', [LanguageController::class, 'update'])->name('languages.update');
+    Route::delete('languages/{language}', [LanguageController::class, 'destroy'])->name('languages.destroy');
+});
+
+
+Route::middleware(['auth'])->prefix('admin')->as('admin.')->group(function () {
+    // CRUD: index, create, store, show, edit, update, destroy
+    Route::resource('invoices', InvoiceController::class);
+});
+
+Route::middleware(['auth'])->prefix('admin')->as('admin.')->group(function () {
+    Route::resource('invoices', InvoiceController::class);
+
+    // Optional helpers
+    Route::get('invoices/{invoice}/print',    [InvoiceController::class, 'print'])->name('invoices.print');
+    Route::get('invoices/{invoice}/download', [InvoiceController::class, 'download'])->name('invoices.download'); // e.g., PDF
+    Route::post('invoices/{invoice}/send',    [InvoiceController::class, 'send'])->name('invoices.send');         // email/share
+    Route::post('invoices/{invoice}/duplicate',[InvoiceController::class, 'duplicate'])->name('invoices.duplicate');
+});
+
+
+
+Route::middleware(['auth'])->prefix('admin')->as('admin.')->group(function () {
+    // Contracts CRUD
+    Route::resource('contracts', ContractController::class);
 });

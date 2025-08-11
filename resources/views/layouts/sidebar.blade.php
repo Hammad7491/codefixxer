@@ -173,6 +173,77 @@
   </ul>
 </li>
 
+
+
+  <!-- Languages (NEW) -->
+      <li class="nav-item">
+        <a class="d-flex align-items-center js-toggle">
+          <iconify-icon icon="mdi:translate" class="menu-icon"></iconify-icon>
+          <span>Languages</span>
+          <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
+        </a>
+        <ul class="sidebar-submenu">
+          <li>
+            <a href="{{ route('admin.languages.create') }}">
+              <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Language
+            </a>
+          </li>
+          <li>
+            <a href="">
+              <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Languages
+            </a>
+          </li>
+        </ul>
+      </li>
+
+
+
+      <!-- Legal Documents section -->
+<li class="sidebar-menu-group-title">Legal Documents</li>
+
+<!-- Invoice -->
+<li class="nav-item">
+  <a class="d-flex align-items-center js-toggle">
+    <iconify-icon icon="mdi:file-document-outline" class="menu-icon"></iconify-icon>
+    <span>Invoice</span>
+    <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
+  </a>
+  <ul class="sidebar-submenu">
+    <li>
+      <a href="{{ route('admin.invoices.create') }}">
+        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Invoice
+      </a>
+    </li>
+    <li>
+      <a href="{{ route('admin.invoices.index') }}">
+        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Invoices
+      </a>
+    </li>
+  </ul>
+</li>
+
+
+
+<li class="nav-item">
+  <a class="d-flex align-items-center js-toggle">
+    <iconify-icon icon="mdi:file-document-outline" class="menu-icon"></iconify-icon>
+    <span>Contract</span>
+    <span class="ms-auto"><iconify-icon icon="mdi:chevron-down"></iconify-icon></span>
+  </a>
+  <ul class="sidebar-submenu">
+    <li>
+      <a href="{{ route('admin.contracts.create') }}">
+        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> Add Contract
+      </a>
+    </li>
+    <li>
+      <a href="{{ route('admin.contracts.index') }}">
+        <i class="ri-circle-fill circle-icon text-primary w-auto"></i> List Contracts
+      </a>
+    </li>
+  </ul>
+</li>
+
     
 
       <!-- Email -->

@@ -25,7 +25,6 @@
   .form-control:focus, .form-select:focus { border-color:#6366f1; box-shadow:0 0 0 .2rem rgba(99,102,241,.15); }
   .help-text { color:#64748b; font-size:.875rem; }
 
-  /* Tags input (Certifications/Projects) */
   .tags-input { display:flex; gap:.5rem; flex-wrap: wrap; min-height: 48px; padding: .35rem .5rem;
     border: 1px solid #e2e8f0; border-radius: 12px; background:#fff !important; color:#0f172a; }
   .tags-input input { border:0; outline:0; min-width:180px; flex:1; padding:.4rem .25rem; background:#fff !important; color:#0f172a; }
@@ -89,16 +88,16 @@
                    placeholder="e.g., University of Karachi" required>
           </div>
 
-          {{-- Start / End Dates --}}
+          {{-- Start / End Dates (formatted for date input) --}}
           <div class="col-md-6">
             <label class="form-label" for="start_date">Start Date</label>
             <input type="date" class="form-control" id="start_date" name="start_date"
-                   value="{{ old('start_date', $education->start_date ?? '') }}" required>
+                   value="{{ old('start_date', optional($education?->start_date)->format('Y-m-d')) }}" required>
           </div>
           <div class="col-md-6">
             <label class="form-label" for="end_date">End Date</label>
             <input type="date" class="form-control" id="end_date" name="end_date"
-                   value="{{ old('end_date', $education->end_date ?? '') }}">
+                   value="{{ old('end_date', optional($education?->end_date)->format('Y-m-d')) }}">
             <div class="help-text mt-1">Leave empty if currently enrolled.</div>
           </div>
 
@@ -153,7 +152,6 @@
   </div>
 </div>
 
-{{-- Tiny tags JS (Enter/Comma/Tab, Backspace remove last, blur capture, JSON sync) --}}
 <script>
   (function(){
     const box   = document.getElementById('tagsBox');
