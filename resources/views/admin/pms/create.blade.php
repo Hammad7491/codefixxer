@@ -113,12 +113,12 @@
     <div class="row g-2 mb-2">
       <div class="col-md-4">
         <label class="label">Title</label>
-        <input type="text" class="form-control"
+        <input type="text" class="form-control ms-title"
                name="milestones[__MI__][title]" placeholder="Milestone title">
       </div>
       <div class="col-md-5">
         <label class="label">Description</label>
-        <input type="text" class="form-control"
+        <input type="text" class="form-control ms-desc"
                name="milestones[__MI__][description]" placeholder="Short description">
       </div>
       <div class="col-md-3">
@@ -130,7 +130,7 @@
 
     <div class="section-title">Tasks</div>
     <div class="tasks" id="tasks-__MI__">
-      <!-- tasks go here -->
+      <!-- default task will be injected empty -->
     </div>
   </div>
 </template>
@@ -140,22 +140,21 @@
     <div class="row g-2 align-items-end">
       <div class="col-md-4">
         <label class="label">Task Name</label>
-        <input type="text" class="form-control"
+        <input type="text" class="form-control task-name"
                name="milestones[__MI__][tasks][__TI__][name]"
                placeholder="Task name">
       </div>
       <div class="col-md-5">
         <label class="label">Description</label>
-        <input type="text" class="form-control"
+        <input type="text" class="form-control task-desc"
                name="milestones[__MI__][tasks][__TI__][description]"
                placeholder="Short description">
       </div>
       <div class="col-md-3">
         <label class="label">Status</label>
-        <select class="form-control"
+        <select class="form-control task-status"
                 name="milestones[__MI__][tasks][__TI__][status]">
-          <option value="todo" selected>To Do</option>
-          <option value="in_progress">In Progress</option>
+          <option value="in_progress" selected>In Progress</option>
           <option value="done">Done</option>
         </select>
       </div>
@@ -188,20 +187,7 @@
     let mi = 0; // milestone index
     const taskCounters = {}; // per milestone
 
-    function addMilestone() {
-      const html = tplMilestone
-        .replaceAll('__MI__', mi)
-        .replace('__MS_NO__', mi + 1);
-      const div = document.createElement('div');
-      div.innerHTML = html.trim();
-      const node = div.firstElementChild;
-      wrap.appendChild(node);
-
-      taskCounters[mi] = 0; // init counter for this milestone
-      mi++;
-      return node;
-    }
-
+    // ---- helpers ----
     function addTask(milestoneNode) {
       const mIndex = parseInt(milestoneNode.getAttribute('data-mi'), 10);
       const ti = taskCounters[mIndex] ?? 0;
@@ -216,19 +202,72 @@
 
       milestoneNode.querySelector('.tasks').appendChild(node);
       taskCounters[mIndex] = ti + 1;
+      return node;
     }
 
-    // Add first milestone by default
+    function addMilestone() {
+      const html = tplMilestone
+        .replaceAll('__MI__', mi)
+        .replace('__MS_NO__', mi + 1);
+      const div = document.createElement('div');
+      div.innerHTML = html.trim();
+      const node = div.firstElementChild;
+      wrap.appendChild(node);
+
+      taskCounters[mi] = 0; // init counter for this milestone
+
+      // Add ONE default task but keep it EMPTY
+      addTask(node);
+
+      mi++;
+      return node;
+    }
+
+    // Fill first task from milestone fields IF the task is still empty
+    function finalizeCurrentMilestone() {
+      const current = wrap.querySelector('.milestone:last-of-type');
+      if (!current) return;
+
+      const title = current.querySelector('.ms-title')?.value?.trim() || '';
+      const desc  = current.querySelector('.ms-desc')?.value?.trim()  || '';
+
+      // first task (data-ti=0)
+      let firstTask = current.querySelector('.tasks .task[data-ti="0"]');
+      if (!firstTask) {
+        // if user removed it, create a new one
+        firstTask = addTask(current);
+        // ensure it's the first logically (we won't reorder visually, that's okay)
+      }
+
+      const tName = firstTask.querySelector('.task-name');
+      const tDesc = firstTask.querySelector('.task-desc');
+
+      if (tName && tName.value.trim() === '' && title !== '') tName.value = title;
+      if (tDesc && tDesc.value.trim() === '' && desc  !== '') tDesc.value = desc;
+
+      // status already defaults to in_progress in the template
+    }
+
+    // Add first milestone on load
     addMilestone();
 
     // Events
-    document.getElementById('addMilestone').addEventListener('click', () => addMilestone());
+    document.getElementById('addMilestone').addEventListener('click', () => {
+      // BEFORE adding a new milestone, finalize the current one
+      finalizeCurrentMilestone();
+      addMilestone();
+    });
+
+    // Also finalize before submit to catch the last milestone case
+    document.getElementById('pmsForm').addEventListener('submit', (e) => {
+      finalizeCurrentMilestone();
+    });
 
     wrap.addEventListener('click', (e) => {
       const btnAddTask = e.target.closest('.js-add-task');
       if (btnAddTask) {
         const m = e.target.closest('.milestone');
-        addTask(m);
+        addTask(m); // extra tasks are manual; no auto-fill
       }
 
       const btnRemoveTask = e.target.closest('.js-remove-task');
